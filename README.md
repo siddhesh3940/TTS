@@ -1,6 +1,6 @@
 # 🎙️ Text to Speech with Subtitle Generation
 
-A multilingual text-to-speech web application built with Streamlit and Microsoft Edge TTS. Convert text to natural-sounding speech in 20+ languages and automatically generate synchronized subtitles (VTT/SRT) for video editing.
+A multilingual text-to-speech web application built with **FastAPI** (backend) and **React + Vite** (frontend). Convert text to natural-sounding speech in 20+ languages and automatically generate synchronized subtitles (VTT/SRT) for video editing.
 
 ---
 
@@ -15,48 +15,120 @@ A multilingual text-to-speech web application built with Streamlit and Microsoft
 
 ---
 
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Backend | FastAPI + Python |
+| Frontend | React 18 + Vite |
+| TTS Engine | edge-tts (Microsoft Azure Neural Voices) |
+| Routing | React Router DOM |
+| Audio Format | MP3 |
+| Subtitle Formats | VTT, SRT |
+| Async Runtime | asyncio |
+
+---
+
+## 🗂️ Project Structure
+
+```
+TTS/
+├── main.py                  # FastAPI backend
+├── requirements.txt         # Python dependencies
+├── voices.txt               # Full list of available voices (400+)
+├── .gitignore
+├── README.md
+├── outputs/                 # Generated audio files (auto-created, not tracked)
+│   └── output.mp3
+└── frontend/                # React Vite frontend
+    ├── public/
+    ├── src/
+    │   ├── components/
+    │   │   └── Sidebar.jsx
+    │   ├── hooks/
+    │   │   └── useTheme.js
+    │   ├── pages/
+    │   │   ├── Home.jsx
+    │   │   └── TextToSpeech.jsx
+    │   ├── App.jsx
+    │   ├── App.css
+    │   ├── main.jsx
+    │   └── index.css
+    ├── index.html
+    ├── package.json
+    └── vite.config.js
+```
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - Python 3.8 or higher
+- Node.js 16 or higher
 - Internet connection (for edge-tts API)
 
-### Installation
+---
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/siddhesh3940/TTS.git
-   cd TTS
-   ```
-
-2. **Create a virtual environment** (recommended)
-   ```bash
-   python -m venv venv
-   ```
-
-3. **Activate the virtual environment**
-   - Windows:
-     ```bash
-     venv\Scripts\activate
-     ```
-   - macOS/Linux:
-     ```bash
-     source venv/bin/activate
-     ```
-
-4. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-### Running the App
+### Step 1 — Clone the repository
 
 ```bash
-streamlit run app.py
+git clone https://github.com/siddhesh3940/TTS.git
+cd TTS
 ```
 
-The app will open automatically in your browser at `http://localhost:8501`
+---
+
+### Step 2 — Backend Setup (FastAPI)
+
+**Create and activate a virtual environment**
+
+Windows:
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+macOS/Linux:
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+**Install Python dependencies**
+
+```bash
+pip install fastapi uvicorn edge-tts
+```
+
+**Start the backend server**
+
+```bash
+uvicorn main:app --reload
+```
+
+Backend runs at → `http://localhost:8000`
+
+---
+
+### Step 3 — Frontend Setup (React + Vite)
+
+Open a **new terminal** and run:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend runs at → `http://localhost:5173`
+
+---
+
+### Step 4 — Open the app
+
+Go to `http://localhost:5173` in your browser.
 
 ---
 
@@ -75,10 +147,9 @@ The app will open automatically in your browser at `http://localhost:8501`
 
 3. **Enter Your Text**
    - Type or paste text in the script area
-   - Character count is displayed below
 
 4. **Generate Speech**
-   - Click "🎤 Generate Speech"
+   - Click "Generate Speech"
    - Wait for processing (usually 2-5 seconds)
 
 5. **Download Outputs**
@@ -86,111 +157,47 @@ The app will open automatically in your browser at `http://localhost:8501`
    - **⬇ VTT** — WebVTT subtitle file (for HTML5 video)
    - **⬇ SRT** — SubRip subtitle file (for video editors)
 
-6. **Preview Captions**
-   - Expand "Preview captions" to see subtitle timing
-
 ---
 
-## 🎯 Use Cases
+## 🔌 API Endpoints
 
-- **Content Creators** — Generate voiceovers for YouTube videos with synced captions
-- **Video Editors** — Create subtitle files for multilingual content
-- **Accessibility** — Add captions to videos for hearing-impaired audiences
-- **E-Learning** — Convert course materials to audio with timestamps
-- **Podcasters** — Generate transcripts with precise timing
-- **Language Learners** — Listen to text in different accents with word-level timing
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/voices` | Returns full voice database |
+| POST | `/api/generate` | Generates speech + subtitles |
+| GET | `/api/audio` | Downloads the generated MP3 |
 
----
+### POST `/api/generate` — Request Body
 
-## 🗂️ Project Structure
-
-```
-TTS/
-├── app.py                  # Main Streamlit application
-├── requirements.txt        # Python dependencies
-├── voices.txt              # Full list of available voices (400+)
-├── .gitignore              # Git ignore rules
-├── README.md               # This file
-└── outputs/                # Generated audio files (auto-created, not tracked)
-    └── output.mp3
+```json
+{
+  "text": "Hello world",
+  "voice_code": "en-US-AriaNeural",
+  "rate": 0,
+  "pitch": 0,
+  "volume": 0
+}
 ```
 
----
+### Response
 
-## 🛠️ Tech Stack
-
-| Component | Technology |
-|-----------|------------|
-| Frontend | Streamlit |
-| TTS Engine | edge-tts (Microsoft Azure Neural Voices) |
-| Language | Python 3.x |
-| Audio Format | MP3 |
-| Subtitle Formats | VTT, SRT |
-| Async Runtime | asyncio |
+```json
+{
+  "audio_url": "/api/audio",
+  "vtt": "WEBVTT\n\n00:00:00.000 --> 00:00:01.200\nHello world",
+  "srt": "1\n00:00:00,000 --> 00:00:01,200\nHello world"
+}
+```
 
 ---
 
 ## 📋 Supported Languages
 
-- **English** — US, UK, Australia, India, Canada
+- **English** — US, UK, Australia, India
 - **Indian Languages** — Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, Urdu
 - **European** — Spanish, French, German, Italian, Portuguese, Russian
-- **Asian** — Japanese, Chinese (Mandarin, Cantonese), Korean
-- **Middle Eastern** — Arabic (Saudi, Egyptian), Urdu
-
----
-
-## 🔧 How It Works
-
-1. **Text Input** → User enters text and selects voice settings
-2. **edge-tts API** → Sends request to Microsoft's neural TTS endpoint
-3. **Stream Processing** → Captures audio chunks + word boundary events
-4. **Subtitle Building** → Groups words into 5-word caption blocks with timestamps
-5. **Output** → Saves MP3 + generates VTT/SRT files
-
-### Subtitle Format Example
-
-**SRT Output:**
-```
-1
-00:00:00,000 --> 00:00:02,340
-Hello this is a test
-
-2
-00:00:02,340 --> 00:00:04,820
-of the subtitle generation feature
-```
-
-**VTT Output:**
-```
-WEBVTT
-
-00:00:00.000 --> 00:00:02.340
-Hello this is a test
-
-00:00:02.340 --> 00:00:04.820
-of the subtitle generation feature
-```
-
----
-
-## 🎨 Customization
-
-### Change Caption Group Size
-
-Edit `app.py` line where `build_subtitles` is called:
-
-```python
-# Default: 5 words per caption
-vtt, srt = asyncio.run(generate_speech(...))
-
-# Custom: 3 words per caption (faster captions)
-# Modify the build_subtitles function call with group_size parameter
-```
-
-### Add More Voices
-
-Expand the `VOICE_DB` dictionary in `app.py` with additional voices from `voices.txt`
+- **Asian** — Japanese, Chinese (Mandarin, Taiwan), Korean
+- **Middle Eastern** — Arabic (Saudi, Egypt)
 
 ---
 
@@ -199,17 +206,6 @@ Expand the `VOICE_DB` dictionary in `app.py` with additional voices from `voices
 - **Internet Required** — edge-tts calls Microsoft's live API
 - **No History** — Each generation overwrites `outputs/output.mp3`
 - **Single Input** — One text at a time (no batch processing yet)
-- **Rate Limits** — Very long texts may timeout
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to:
-- Add more languages/voices
-- Improve subtitle grouping logic
-- Add batch processing
-- Implement generation history
 
 ---
 
@@ -222,15 +218,10 @@ This project is open source and available under the MIT License.
 ## 🙏 Acknowledgments
 
 - **edge-tts** — Free Python library for Microsoft Edge TTS
-- **Streamlit** — Rapid web app framework
+- **FastAPI** — Modern Python web framework
+- **React + Vite** — Fast frontend tooling
 - **Microsoft Azure** — Neural voice models
 
 ---
 
-## 📞 Support
-
-For issues or questions, open an issue on [GitHub](https://github.com/siddhesh3940/TTS/issues)
-
----
-
-**Made with ❤️ using Python and Streamlit**
+**Made with ❤️ using FastAPI and React**
