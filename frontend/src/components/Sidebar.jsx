@@ -2,19 +2,22 @@ import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 const NAV_ITEMS = [
-  { icon: '⊞', label: 'Home',           path: '/home' },
+  { icon: '⊞',  label: 'Home',           path: '/home' },
   { icon: '🎙️', label: 'Text to Speech', path: '/text-to-speech' },
   { icon: '🎤', label: 'Voice Cloning',  path: '/voice-clone' },
-  { icon: '🔊', label: 'Sound Effects',  path: '#' },
-  { icon: '🖼️', label: 'Image & Video',  path: '#' },
-  { icon: '🔀', label: 'Flows',          path: '#' },
-  { icon: '🎵', label: 'Music',          path: '#' },
-  { icon: '📝', label: 'Speech to Text', path: '#' },
+  { icon: '📝', label: 'Speech to Text', path: '/speech-to-text' },
+  { icon: '✂️', label: 'Audio Editor',   path: '/audio-editor' },
+  { icon: '🔊', label: 'Sound Effects',  path: '#', soon: true },
+  { icon: '🖼️', label: 'Image & Video',  path: '#', soon: true },
+  { icon: '🔀', label: 'Flows',          path: '#', soon: true },
+  { icon: '🎵', label: 'Music',          path: '#', soon: true },
 ]
 
 const PINNED = [
   { icon: '🎙️', label: 'Text to Speech', path: '/text-to-speech' },
   { icon: '🎤', label: 'Voice Cloning',  path: '/voice-clone' },
+  { icon: '📝', label: 'Speech to Text', path: '/speech-to-text' },
+  { icon: '✂️', label: 'Audio Editor',   path: '/audio-editor' },
 ]
 
 export default function Sidebar({ theme, onThemeToggle }) {
@@ -26,21 +29,21 @@ export default function Sidebar({ theme, onThemeToggle }) {
 
   return (
     <aside className="sidebar">
-      {/* Brand */}
       <div className="sidebar-brand">
         <div className="sidebar-brand-icon">🎧</div>
         <span className="sidebar-brand-name">SoundStudio</span>
       </div>
 
-      {/* Main Nav */}
-      {NAV_ITEMS.map(({ icon, label, path }) => (
+      {NAV_ITEMS.map(({ icon, label, path, soon }) => (
         <button
           key={label}
-          className={`sidebar-link${pathname === path ? ' active' : ''}`}
+          className={`sidebar-link${pathname === path ? ' active' : ''}${soon ? ' soon' : ''}`}
           onClick={() => go(path)}
+          title={soon ? `${label} — coming soon` : label}
         >
           <span className="icon">{icon}</span>
           {label}
+          {soon && <span className="soon-tag">Soon</span>}
         </button>
       ))}
 
@@ -58,11 +61,9 @@ export default function Sidebar({ theme, onThemeToggle }) {
         </button>
       ))}
 
-      {/* Bottom */}
       <div className="sidebar-bottom">
         <div className="divider" style={{ marginBottom: 8 }} />
 
-        {/* Theme Toggle */}
         <button
           id="btn-theme-toggle"
           className="theme-toggle"
@@ -76,14 +77,13 @@ export default function Sidebar({ theme, onThemeToggle }) {
           </div>
         </button>
 
-        <button className="sidebar-link">
-          <span className="icon">👨‍💻</span>Developers
+        <button className="sidebar-link soon" title="Coming soon">
+          <span className="icon">👨💻</span>Developers<span className="soon-tag">Soon</span>
         </button>
-        <button className="sidebar-link">
-          <span className="icon">⬆️</span>Upgrade
+        <button className="sidebar-link soon" title="Coming soon">
+          <span className="icon">⬆️</span>Upgrade<span className="soon-tag">Soon</span>
         </button>
       </div>
     </aside>
   )
 }
-

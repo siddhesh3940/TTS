@@ -2,26 +2,26 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const TOOL_CARDS = [
-  { icon: '⚡', label: 'Instant speech',  bg: 'linear-gradient(135deg,#3b82f6,#6366f1)', path: '/text-to-speech' },
-  { icon: '📖', label: 'Audiobook',        bg: 'linear-gradient(135deg,#ec4899,#f97316)', path: '#' },
-  { icon: '🎬', label: 'Image & Video',    bg: 'linear-gradient(135deg,#10b981,#06b6d4)', path: '#' },
-  { icon: '🤖', label: 'AI Agents',        bg: 'linear-gradient(135deg,#a855f7,#6366f1)', path: '#' },
-  { icon: '🎵', label: 'Music',            bg: 'linear-gradient(135deg,#f59e0b,#f97316)', path: '#' },
-  { icon: '🌐', label: 'Dubbed video',     bg: 'linear-gradient(135deg,#14b8a6,#0ea5e9)', path: '#' },
+  { icon: '⚡', label: 'Instant Speech',  bg: 'linear-gradient(135deg,#3b82f6,#6366f1)', path: '/text-to-speech' },
+  { icon: '📖', label: 'Audiobook',       bg: 'linear-gradient(135deg,#ec4899,#f97316)', path: '#', soon: true },
+  { icon: '🎬', label: 'Image & Video',   bg: 'linear-gradient(135deg,#10b981,#06b6d4)', path: '#', soon: true },
+  { icon: '🤖', label: 'AI Agents',       bg: 'linear-gradient(135deg,#a855f7,#6366f1)', path: '#', soon: true },
+  { icon: '🎵', label: 'Music',           bg: 'linear-gradient(135deg,#f59e0b,#f97316)', path: '#', soon: true },
+  { icon: '🌐', label: 'Dubbed Video',    bg: 'linear-gradient(135deg,#14b8a6,#0ea5e9)', path: '#', soon: true },
 ]
 
 const LIBRARY_ITEMS = [
-  { initials: 'M', color: '#7c3aed', name: 'Mahesh — Banarasi Recovery Agent',  desc: 'Mahesh delivers a warm, relatable, and problem-solving tone…' },
-  { initials: 'M', color: '#2563eb', name: 'Manav — Charming, Husky and Warm',  desc: 'Manav — Charming, Husky Indian Male Voice — A rich, husky voice…' },
-  { initials: 'S', color: '#db2777', name: 'Saavi — Soft, Tender and Relatable', desc: 'Saavi — Innocent Social Media Voice, Expressive & Relatable…' },
-  { initials: 'B', color: '#d97706', name: 'Bunty — Punchy, Crisp and Reel King', desc: 'Bunty — Real Perfect Voice · A vibrant AI voice crafted…' },
-  { initials: 'P', color: '#059669', name: 'Priyanka',                           desc: 'Warm but bright Indian female storyteller voice…' },
+  { initials: 'M', color: '#7c3aed', name: 'Mahesh — Banarasi Recovery Agent',   desc: 'Warm, relatable, problem-solving tone…' },
+  { initials: 'M', color: '#2563eb', name: 'Manav — Charming, Husky and Warm',   desc: 'Rich, husky Indian male voice…' },
+  { initials: 'S', color: '#db2777', name: 'Saavi — Soft, Tender and Relatable', desc: 'Innocent social media voice, expressive…' },
+  { initials: 'B', color: '#d97706', name: 'Bunty — Punchy, Crisp and Reel King', desc: 'Vibrant AI voice crafted for reels…' },
+  { initials: 'P', color: '#059669', name: 'Priyanka',                            desc: 'Warm but bright Indian female storyteller…' },
 ]
 
 const VOICE_CLONE_CARDS = [
-  { icon: '✨', bg: '#7c3aed', label: 'Voice Design',      subtitle: 'Design an entirely new voice from a text prompt' },
+  { icon: '✨', bg: '#7c3aed', label: 'Voice Design',      subtitle: 'Design an entirely new voice from a text prompt', soon: true },
   { icon: '🎤', bg: '#0ea5e9', label: 'Clone your Voice',  subtitle: 'Create a realistic digital clone of your voice', path: '/voice-clone' },
-  { icon: '📚', bg: '#10b981', label: 'Voice Collections', subtitle: 'Curated AI voices for every use case' },
+  { icon: '📚', bg: '#10b981', label: 'Voice Collections', subtitle: 'Curated AI voices for every use case', soon: true },
 ]
 
 function getGreeting() {
@@ -33,12 +33,10 @@ function getGreeting() {
 
 export default function Home() {
   const navigate = useNavigate()
-
-  const go = (path) => { if (path !== '#') navigate(path) }
+  const go = (path, soon) => { if (!soon && path !== '#') navigate(path) }
 
   return (
     <>
-      {/* Top bar */}
       <div className="topbar">
         <span className="topbar-label">My Workspace</span>
         <div className="topbar-actions">
@@ -46,33 +44,31 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Greeting */}
       <h1 className="greeting-title">{getGreeting()}, Sid</h1>
 
-      {/* Tool Cards */}
       <p className="section-heading">Workspace tools</p>
       <div className="cards-grid">
-        {TOOL_CARDS.map(({ icon, label, bg, path }) => (
-          <div className="tool-card" key={label} onClick={() => go(path)}>
-            <div className="tool-card-icon" style={{ background: bg }}>
-              {icon}
-            </div>
+        {TOOL_CARDS.map(({ icon, label, bg, path, soon }) => (
+          <div
+            className={`tool-card${soon ? ' tool-card-soon' : ''}`}
+            key={label}
+            onClick={() => go(path, soon)}
+            title={soon ? `${label} — coming soon` : label}
+          >
+            <div className="tool-card-icon" style={{ background: bg }}>{icon}</div>
             <span className="tool-card-label">{label}</span>
+            {soon && <span className="card-soon-badge">Soon</span>}
           </div>
         ))}
       </div>
 
-      {/* Two column split */}
       <div className="home-split">
-        {/* Latest from the library */}
         <div>
           <p className="section-heading">Latest from the library</p>
           <div className="library-list">
             {LIBRARY_ITEMS.map(({ initials, color, name, desc }) => (
-              <div className="library-item" key={name}>
-                <div className="library-avatar" style={{ background: color + '33', color }}>
-                  {initials}
-                </div>
+              <div className="library-item" key={name} onClick={() => navigate('/text-to-speech')}>
+                <div className="library-avatar" style={{ background: color + '33', color }}>{initials}</div>
                 <div className="library-meta">
                   <div className="library-name">{name}</div>
                   <div className="library-desc">{desc}</div>
@@ -81,22 +77,27 @@ export default function Home() {
             ))}
           </div>
           <br />
-          <button className="btn btn-secondary btn-sm" onClick={() => go('/text-to-speech')}>
+          <button className="btn btn-secondary btn-sm" onClick={() => navigate('/text-to-speech')}>
             Explore Library
           </button>
         </div>
 
-        {/* Create or clone a voice */}
         <div>
           <p className="section-heading">Create or clone a voice</p>
           <div className="clone-grid">
-            {VOICE_CLONE_CARDS.map(({ icon, bg, label, subtitle, path }) => (
-              <div className="clone-item" key={label} onClick={() => go(path || '/text-to-speech')}>
-                <div className="clone-icon" style={{ background: bg + '33', color: bg }}>
-                  {icon}
-                </div>
+            {VOICE_CLONE_CARDS.map(({ icon, bg, label, subtitle, path, soon }) => (
+              <div
+                className={`clone-item${soon ? ' clone-item-soon' : ''}`}
+                key={label}
+                onClick={() => go(path || '/text-to-speech', soon)}
+                title={soon ? `${label} — coming soon` : label}
+              >
+                <div className="clone-icon" style={{ background: bg + '33', color: bg }}>{icon}</div>
                 <div className="clone-meta">
-                  <div className="clone-title">{label}</div>
+                  <div className="clone-title">
+                    {label}
+                    {soon && <span className="card-soon-badge" style={{ marginLeft: 8 }}>Soon</span>}
+                  </div>
                   <div className="clone-subtitle">{subtitle}</div>
                 </div>
               </div>
