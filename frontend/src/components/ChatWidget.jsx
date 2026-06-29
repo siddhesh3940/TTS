@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 
-const API = 'http://localhost:8000'
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const MODELS = [
   { id: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },

@@ -6,8 +6,9 @@ const NAV_ITEMS = [
   { icon: '🎙️', label: 'Text to Speech', path: '/text-to-speech' },
   { icon: '🎤', label: 'Voice Cloning',  path: '/voice-clone' },
   { icon: '📝', label: 'Speech to Text', path: '/speech-to-text' },
-  { icon: '✂️', label: 'Audio Editor',   path: '/audio-editor' },
-  { icon: '🔊', label: 'Sound Effects',  path: '#', soon: true },
+  { icon: '✂️', label: 'Audio Editor',      path: '/audio-editor' },
+  { icon: '🌐', label: 'Voice Translation', path: '/voice-translation' },
+  { icon: '🔊', label: 'Sound Effects',     path: '#', soon: true },
   { icon: '🖼️', label: 'Image & Video',  path: '#', soon: true },
   { icon: '🔀', label: 'Flows',          path: '#', soon: true },
   { icon: '🎵', label: 'Music',          path: '#', soon: true },
@@ -17,7 +18,8 @@ const PINNED = [
   { icon: '🎙️', label: 'Text to Speech', path: '/text-to-speech' },
   { icon: '🎤', label: 'Voice Cloning',  path: '/voice-clone' },
   { icon: '📝', label: 'Speech to Text', path: '/speech-to-text' },
-  { icon: '✂️', label: 'Audio Editor',   path: '/audio-editor' },
+  { icon: '✂️', label: 'Audio Editor',      path: '/audio-editor' },
+  { icon: '🌐', label: 'Voice Translation', path: '/voice-translation' },
 ]
 
 export default function Sidebar({ theme, onThemeToggle }) {

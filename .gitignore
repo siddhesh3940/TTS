@@ -5,4 +5,12 @@ __pycache__/
 venv/
 .venv/
 .venv311/
+.venv_seamless/
 openvoice_checkpoints/
+processed/
+server.log
+test_out.txt
+test_clone_out.txt
+*.pth
+*.wav
+*.mp3

@@ -303,6 +303,116 @@ def get_srt():
     return FileResponse(str(srt_path), media_type="text/plain", filename="subtitles.srt")
 
 
+# ── Voice Translation (SeamlessM4T v2 subprocess + OpenVoice) ───────────────────────────
+
+SEAMLESS_LANGS = {
+    "English":"eng","Hindi":"hin","Tamil":"tam","Telugu":"tel","Bengali":"ben",
+    "Marathi":"mar","Gujarati":"guj","Kannada":"kan","Malayalam":"mal","Urdu":"urd",
+    "Spanish":"spa","French":"fra","German":"deu","Italian":"ita","Portuguese":"por",
+    "Japanese":"jpn","Chinese":"cmn","Korean":"kor","Arabic":"arb","Russian":"rus",
+    "Dutch":"nld","Turkish":"tur","Polish":"pol","Swedish":"swe","Indonesian":"ind",
+}
+
+# Path to the separate SeamlessM4T venv python executable
+SEAMLESS_PYTHON = BASE_DIR / ".venv_seamless" / "Scripts" / "python.exe"
+SEAMLESS_WORKER = BASE_DIR / "seamless_worker.py"
+
+
+@app.get("/api/translate/languages")
+def get_translate_languages():
+    return {"languages": list(SEAMLESS_LANGS.keys())}
+
+
+@app.post("/api/translate")
+async def translate_voice(
+    file: UploadFile = File(...),
+    target_lang: str = Form(...),
+    clone_voice: str = Form(default="true"),
+):
+    import subprocess, json
+
+    if target_lang not in SEAMLESS_LANGS:
+        raise HTTPException(status_code=400, detail=f"Unsupported language: {target_lang}")
+
+    if not SEAMLESS_PYTHON.exists():
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "SeamlessM4T venv not found. Run: "
+                "python -m venv .venv_seamless && "
+                ".venv_seamless\\Scripts\\pip.exe install transformers==4.40.0 torch torchaudio sentencepiece"
+            )
+        )
+
+    trans_dir = BASE_DIR / "outputs" / "translate"
+    trans_dir.mkdir(exist_ok=True)
+    ref_path     = trans_dir / f"input_{file.filename}"
+    out_seamless = str(trans_dir / "seamless_out.wav")
+    out_final    = str(trans_dir / "translated_output.wav")
+
+    with open(ref_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    try:
+        # ── Step 1: Run SeamlessM4T in isolated subprocess ────────────────────────
+        worker_args = json.dumps({
+            "input_path":  str(ref_path),
+            "output_path": out_seamless,
+            "target_lang": target_lang,
+        })
+        proc = subprocess.run(
+            [str(SEAMLESS_PYTHON), str(SEAMLESS_WORKER), worker_args],
+            capture_output=True, text=True, timeout=600
+        )
+        if proc.returncode != 0:
+            raise HTTPException(status_code=500,
+                detail=f"SeamlessM4T failed: {proc.stderr[-1000:]}")
+
+        # ── Step 2: Optional OpenVoice tone-color transfer ────────────────────
+        do_clone = clone_voice.lower() in ("true", "1", "yes")
+        if do_clone:
+            ckpt_dir = BASE_DIR / "openvoice_checkpoints/checkpoints_v2/converter"
+            ses_dir  = BASE_DIR / "openvoice_checkpoints/checkpoints_v2/base_speakers/ses"
+            if ckpt_dir.exists() and ses_dir.exists():
+                import torch
+                from openvoice import se_extractor
+                from openvoice.api import ToneColorConverter
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+                tone_converter = ToneColorConverter(str(ckpt_dir / "config.json"), device=device)
+                tone_converter.load_ckpt(str(ckpt_dir / "checkpoint.pth"))
+                target_se, _ = se_extractor.get_se(str(ref_path), tone_converter, vad=True)
+                se_file = ses_dir / "en-default.pth"
+                if not se_file.exists():
+                    se_file = next(ses_dir.glob("*.pth"), None)
+                if se_file:
+                    source_se = torch.load(str(se_file), map_location=device)
+                    tone_converter.convert(
+                        audio_src_path=out_seamless,
+                        src_se=source_se,
+                        tgt_se=target_se,
+                        output_path=out_final,
+                    )
+                else:
+                    shutil.copy(out_seamless, out_final)
+            else:
+                shutil.copy(out_seamless, out_final)
+        else:
+            shutil.copy(out_seamless, out_final)
+
+    except HTTPException:
+        raise
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=500, detail="Translation timed out (>10 min).")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return FileResponse(
+        out_final,
+        media_type="audio/wav",
+        filename=f"translated_{target_lang.lower()}.wav",
+    )
+
+
 # ── AI Chatbot ────────────────────────────────────────────────────────────────
 class ChatRequest(BaseModel):
     messages: list

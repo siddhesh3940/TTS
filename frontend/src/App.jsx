@@ -6,6 +6,7 @@ import TextToSpeech from './pages/TextToSpeech'
 import VoiceClone from './pages/VoiceClone'
 import SpeechToText from './pages/SpeechToText'
 import AudioEditor from './pages/AudioEditor'
+import VoiceTranslation from './pages/VoiceTranslation'
 import ChatWidget from './components/ChatWidget'
 import useTheme from './hooks/useTheme'
 
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/voice-clone" element={<VoiceClone />} />
           <Route path="/speech-to-text" element={<SpeechToText />} />
           <Route path="/audio-editor" element={<AudioEditor />} />
+          <Route path="/voice-translation" element={<VoiceTranslation />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </main>
